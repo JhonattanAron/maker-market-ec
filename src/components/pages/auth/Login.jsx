@@ -1,31 +1,47 @@
 "use client";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // Importa useRouter
 import { Typography, Input, Button } from "@material-tailwind/react";
 import { EyeSlashIcon, EyeIcon } from "@heroicons/react/24/solid";
+import { useAuth } from "@/context/AuthContext";
+import { AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import ROUTES from "@/constants/routes";
+import { signIn } from "next-auth/react";
 
 export function Login(params) {
   const [passwordShown, setPasswordShown] = useState(false);
   const togglePasswordVisiblity = () => setPasswordShown((cur) => !cur);
+  const [error, setError] = useState("");
+  const [error1, setError1] = useState("");
+  const { logIn, errorLogin } = useAuth();
+  const router = useRouter(); // Inicializa el hook useRouter
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    const email = e.target.email.value;
+    const password = e.target.password.value;
 
-    console.log(JSON.stringify({ email, password }));
+    const res = await logIn(email, password);
+    if (res) {
+      console.log("Login Exitoso");
+      router.push(ROUTES.PUBLIC.LOGIN);
+    } else {
+      setError1("Error al iniciar Session | Verifique sus credenciales");
+      setError(errorLogin);
+      setTimeout(() => {
+        setError("");
+      }, 10000);
+    }
+  };
 
-    //const res = await fetch("/api/auth/login", {
-    //  method: "POST",
-    //  headers: {
-    //    "Content-Type": "application/json",
-    //  },
-    //  body: JSON.stringify({ email, password }),
-    //});
-    //
-    //if (res.ok) {
-    //  alert("Login exitoso");
-    //} else {
-    //  setError("Login fallido. Verifica tus credenciales");
-    //}
+  const handleLoginGoogle = async () => {
+    try {
+      // Inicia sesión con Google
+      await signIn("google");
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+    }
   };
 
   return (
@@ -42,6 +58,21 @@ export function Login(params) {
           className="mx-auto max-w-[24rem] text-left"
         >
           <div className="mb-6">
+            {error && (
+              <AnimatePresence>
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0 }}
+                  key="box"
+                  className="bg-red-200 border-red-600 text-red-600 border-l-4 p-4"
+                  role="alert"
+                >
+                  <p className="font-bold">Error</p>
+                  <p>{error}</p>
+                </motion.div>
+              </AnimatePresence> // Mostrar el error solo si existe
+            )}
             <label htmlFor="email">
               <Typography
                 variant="small"
@@ -51,6 +82,7 @@ export function Login(params) {
               </Typography>
             </label>
             <Input
+              required
               id="email"
               color="gray"
               size="lg"
@@ -73,6 +105,7 @@ export function Login(params) {
               </Typography>
             </label>
             <Input
+              required
               size="lg"
               placeholder="********"
               id="password"
@@ -93,6 +126,7 @@ export function Login(params) {
               }
             />
           </div>
+          <h1 className="text-red-400">{error1}</h1>
           <Button
             type="submit"
             color="gray"
@@ -102,22 +136,12 @@ export function Login(params) {
           >
             sign in
           </Button>
-          <div className="!mt-4 flex justify-end">
-            <Typography
-              as="a"
-              href="#"
-              color="blue-gray"
-              variant="small"
-              className="font-medium"
-            >
-              Forgot password
-            </Typography>
-          </div>
           <Button
             variant="outlined"
             size="lg"
             className="mt-6 flex h-12 items-center justify-center gap-2"
             fullWidth
+            onClick={handleLoginGoogle}
           >
             <img
               src={`https://www.material-tailwind.com/logos/logo-google.png`}
@@ -126,16 +150,6 @@ export function Login(params) {
             />{" "}
             sign in with google
           </Button>
-          <Typography
-            variant="small"
-            color="gray"
-            className="!mt-4 text-center font-normal"
-          >
-            Not registered?{" "}
-            <a href="#" className="font-medium text-gray-900">
-              Create account
-            </a>
-          </Typography>
         </form>
       </div>
     </section>

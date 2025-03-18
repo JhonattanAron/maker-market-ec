@@ -11,10 +11,12 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@material-tailwind/react": "^2.1.10",
+    "@nestjs/jwt": "^11.0.0",
     "@tailwindcss/postcss": "^4.0.14",
     "framer-motion": "^12.5.0",
     "maker-market": "file:",
     "next": "^15.2.2",
+    "next-auth": "^4.24.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

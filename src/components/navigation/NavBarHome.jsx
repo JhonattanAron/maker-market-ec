@@ -32,8 +32,11 @@ import {
   TagIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
-import { useRouter } from "next/router";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
+import ROUTES from "@/constants/routes";
+import LogoutButton from "../auth/LogoutButton";
 
 const navListMenuItems = [
   {
@@ -82,6 +85,8 @@ const navListMenuItems = [
     icon: TagIcon,
   },
 ];
+
+const ProfileImg = "https://www.tailwind-kit.com/images/person/1.jpg";
 
 function NavListMenu() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -163,33 +168,55 @@ function NavListMenu() {
 }
 
 function NavList() {
+  const { isAuthenticated, logout } = useAuth();
+  const router = useRouter();
   return (
-    <List className="mt-4 mb-6 p-0 lg:mt-0 lg:mb-0 lg:flex-row lg:p-1">
-      <Typography
-        as="a"
-        href="#"
-        variant="small"
-        color="blue-gray"
-        className="font-medium"
-      >
-        <ListItem className="flex items-center gap-2 py-2 pr-4">Home</ListItem>
-      </Typography>
-      <NavListMenu />
-      <div>
-        <div class=" flex items-center justify-center w-auto h-10 p-3 pr-2 text-sm text-gray-500 uppercase cursor-pointer bg-gray-100 dark:bg-gray-800 rounded-2xl">
-          <MagnifyingGlassIcon className="h-6 w-6 mx-auto" />
-          <input
-            type="text"
-            class="block w-full py-1.5 pl-2 pr-4 leading-normal rounded-2xl focus:border-transparent focus:outline-none focus:ring-2 bg-gray-100 focus:ring-gray-100 ring-opacity-90  aa-input"
-            placeholder="Search"
-          />
+    <>
+      <List className="mt-4 mb-6 p-0 lg:mt-0 lg:mb-0 lg:flex-row lg:p-1">
+        <Typography
+          as="a"
+          href={ROUTES.PUBLIC.HOME}
+          variant="small"
+          color="blue-gray"
+          className="font-medium"
+        >
+          <ListItem className="flex items-center gap-2 py-2 pr-4">
+            Home
+          </ListItem>
+        </Typography>
+        <NavListMenu />
+        <div>
+          <div className=" flex items-center justify-center w-auto h-10 p-3 pr-2 text-sm text-gray-500 uppercase cursor-pointer bg-gray-100 dark:bg-gray-800 rounded-2xl">
+            <MagnifyingGlassIcon className="h-6 w-6 mx-auto" />
+            <input
+              type="text"
+              className="block w-full py-1.5 pl-2 pr-4 leading-normal rounded-2xl focus:border-transparent focus:outline-none focus:ring-2 bg-gray-100 focus:ring-gray-100 ring-opacity-90  aa-input"
+              placeholder="Search"
+            />
+          </div>
         </div>
-      </div>
-    </List>
+      </List>
+      {isAuthenticated ? (
+        <div className="flex justify-around lg:hidden">
+          <a href="#" className="relative block">
+            <img
+              alt="profil"
+              src={ProfileImg}
+              className="mx-auto object-cover rounded-full h-12 w-12 "
+            />
+          </a>
+          <LogoutButton />
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
   );
 }
 
 export function NavBarHome() {
+  const { isAuthenticated } = useAuth();
+
   const [openNav, setOpenNav] = React.useState(false);
 
   React.useEffect(() => {
@@ -204,7 +231,7 @@ export function NavBarHome() {
       <div className="flex items-center justify-between text-blue-gray-900">
         <Typography
           as="a"
-          href="#"
+          href={ROUTES.PUBLIC.HOME}
           variant="h6"
           className="mr-4 cursor-pointer py-1.5 lg:ml-2"
         >
@@ -214,14 +241,30 @@ export function NavBarHome() {
           <NavList />
         </div>
         <div className="hidden gap-2 lg:flex">
-          <Link href="/auth">
-            <Button variant="text" size="sm" color="blue-gray">
-              Log In
-            </Button>
-          </Link>
-          <Button variant="gradient" size="sm">
-            Sign In
-          </Button>
+          {isAuthenticated ? (
+            <>
+              <a href="#" className="relative block">
+                <img
+                  alt="profil"
+                  src={ProfileImg}
+                  className="mx-auto object-cover rounded-full h-12 w-12 "
+                />
+              </a>
+            </>
+          ) : (
+            <>
+              <Link href={ROUTES.PUBLIC.LOGIN}>
+                <Button variant="text" size="sm" color="blue-gray">
+                  Log In
+                </Button>
+              </Link>
+              <Link href={ROUTES.PUBLIC.REGISTER}>
+                <Button variant="gradient" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
         <IconButton
           variant="text"
@@ -238,14 +281,29 @@ export function NavBarHome() {
       </div>
       <Collapse open={openNav}>
         <NavList />
-        <div className="flex w-full flex-nowrap items-center gap-2 lg:hidden">
-          <Button variant="outlined" size="sm" color="blue-gray" fullWidth>
-            Log In
-          </Button>
-          <Button variant="gradient" size="sm" fullWidth>
-            Sign In
-          </Button>
-        </div>
+        {isAuthenticated ? (
+          <></>
+        ) : (
+          <>
+            <div className="flex w-full flex-nowrap items-center gap-2 lg:hidden">
+              <Link href={ROUTES.PUBLIC.LOGIN}>
+                <Button
+                  variant="outlined"
+                  size="sm"
+                  color="blue-gray"
+                  fullWidth
+                >
+                  Log In
+                </Button>
+              </Link>
+              <Link href={ROUTES.PUBLIC.REGISTER}>
+                <Button variant="gradient" size="sm" fullWidth>
+                  Sign In
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
       </Collapse>
     </Navbar>
   );

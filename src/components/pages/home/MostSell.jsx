@@ -1,9 +1,5 @@
 "use client";
 
-import {
-  ProductsCarrusel,
-  ProductSlider,
-} from "@/components/navigation/ProductsCarrusel";
 import { Card, CardBody, Typography } from "@material-tailwind/react";
 
 export function MostSell(params) {

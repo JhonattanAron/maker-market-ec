@@ -21,14 +21,20 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "baseUrl": ".", // Agregado para soportar alias
+    "paths": {
+      "@/*": ["src/*"] // Alias para las importaciones con @
+    }
   },
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
+    "src/app/api/**/*.ts",
+    "src/app/api/**/*.tsx",
+    "src/**/*.js", // Incluye archivos JS para que no haya problemas
+    "src/**/*.jsx" // Incluye archivos JSX para que no haya problemas
+, "src/context/AuthContext.js"  ],
   "exclude": [
     "node_modules"
   ]

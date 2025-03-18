@@ -1,6 +1,7 @@
 import { ProductSlider } from "@/components/navigation/ProductsCarrusel";
 import { HomeWidget } from "@/components/pages/home/HomeWidget";
 import { MostSell } from "@/components/pages/home/MostSell";
+import { cookies } from "next/headers";
 
 export const metadata = {
   title: "Maker Market | Innovación en Productos Impresos en 3D",
