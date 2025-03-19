@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Navbar,
   Collapse,
@@ -33,10 +33,10 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/solid";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import ROUTES from "@/constants/routes";
 import LogoutButton from "../auth/LogoutButton";
+import { useSession } from "next-auth/react";
 
 const navListMenuItems = [
   {
@@ -86,11 +86,10 @@ const navListMenuItems = [
   },
 ];
 
-const ProfileImg = "https://www.tailwind-kit.com/images/person/1.jpg";
-
 function NavListMenu() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
   const renderItems = navListMenuItems.map(
     ({ icon, title, description }, key) => (
       <a href="#" key={key}>
@@ -168,7 +167,17 @@ function NavListMenu() {
 }
 
 function NavList() {
-  const { isAuthenticated, logout } = useAuth();
+  const { data: session } = useSession();
+  const [userImage, setUserImage] = useState("/default-avatar.png");
+
+  useEffect(() => {
+    if (session?.user?.image) {
+      setUserImage(session.user.image);
+    } else {
+      setUserImage("/default-avatar.png");
+    }
+  }, [session]);
+
   const router = useRouter();
   return (
     <>
@@ -196,12 +205,12 @@ function NavList() {
           </div>
         </div>
       </List>
-      {isAuthenticated ? (
+      {session?.user ? (
         <div className="flex justify-around lg:hidden">
           <a href="#" className="relative block">
             <img
               alt="profil"
-              src={ProfileImg}
+              src={userImage}
               className="mx-auto object-cover rounded-full h-12 w-12 "
             />
           </a>
@@ -215,9 +224,17 @@ function NavList() {
 }
 
 export function NavBarHome() {
-  const { isAuthenticated } = useAuth();
-
   const [openNav, setOpenNav] = React.useState(false);
+  const { data: session } = useSession();
+  const [userImage, setUserImage] = useState("/default-avatar.png");
+
+  useEffect(() => {
+    if (session?.user?.image) {
+      setUserImage(session.user.image);
+    } else {
+      setUserImage("/default-avatar.png");
+    }
+  }, [session]);
 
   React.useEffect(() => {
     window.addEventListener(
@@ -241,12 +258,12 @@ export function NavBarHome() {
           <NavList />
         </div>
         <div className="hidden gap-2 lg:flex">
-          {isAuthenticated ? (
+          {session?.user ? (
             <>
               <a href="#" className="relative block">
                 <img
                   alt="profil"
-                  src={ProfileImg}
+                  src={userImage}
                   className="mx-auto object-cover rounded-full h-12 w-12 "
                 />
               </a>
@@ -281,7 +298,7 @@ export function NavBarHome() {
       </div>
       <Collapse open={openNav}>
         <NavList />
-        {isAuthenticated ? (
+        {session?.user ? (
           <></>
         ) : (
           <>

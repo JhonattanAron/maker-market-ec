@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; // Importa useRouter
 import { Typography, Input, Button } from "@material-tailwind/react";
 import { EyeSlashIcon, EyeIcon } from "@heroicons/react/24/solid";
-import { useAuth } from "@/context/AuthContext";
 import { AnimatePresence } from "framer-motion";
 import { motion } from "framer-motion";
 import ROUTES from "@/constants/routes";
@@ -14,24 +13,27 @@ export function Login(params) {
   const togglePasswordVisiblity = () => setPasswordShown((cur) => !cur);
   const [error, setError] = useState("");
   const [error1, setError1] = useState("");
-  const { logIn, errorLogin } = useAuth();
   const router = useRouter(); // Inicializa el hook useRouter
 
   const handleLogin = async (e) => {
     e.preventDefault();
     const email = e.target.email.value;
     const password = e.target.password.value;
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
 
-    const res = await logIn(email, password);
-    if (res) {
-      console.log("Login Exitoso");
-      router.push(ROUTES.PUBLIC.LOGIN);
-    } else {
-      setError1("Error al iniciar Session | Verifique sus credenciales");
-      setError(errorLogin);
-      setTimeout(() => {
-        setError("");
-      }, 10000);
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        router.push(ROUTES.PROTECTED.DASHBOARD);
+      }
+    } catch (error) {
+      console.error("Error al iniciar sesión:", error);
+      setError("Ocurrió un error inesperado. Inténtalo de nuevo.");
     }
   };
 

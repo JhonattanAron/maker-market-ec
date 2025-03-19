@@ -3,33 +3,17 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@material-tailwind/react";
+import { useSession } from "next-auth/react";
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
-  const router = useRouter();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const res = await fetch("/api/auth/me", {
-        credentials: "include", // Asegura que las cookies se incluyan en la solicitud
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data);
-      } else {
-        router.push("/login"); // Redirige al login si no está autenticado
-      }
-    };
-
-    fetchUser();
-  }, [router]);
-
   const profileImg = "https://www.tailwind-kit.com/images/person/1.jpg";
   const landScapeImg = "https://www.tailwind-kit.com/images/landscape/1.jpg";
   const Zona = "Ecuador - Quito - Pifo";
 
-  return user ? (
+  const { data: session } = useSession();
+  console.log(session);
+
+  return session?.user ? (
     <div className="w-full h-full flex items-center justify-center">
       <div className="bg-white shadow-lg rounded-2xl w-80 dark:bg-gray-800 mt-[10%] sm:mt-[5%]">
         <img
@@ -38,17 +22,22 @@ export default function Dashboard() {
           className="w-full mb-4 rounded-t-lg h-28"
         />
         <div className="flex flex-col items-center justify-center p-4 -mt-16">
-          <a href="#" className="relative block">
-            <img
-              alt="profil"
-              src={profileImg}
-              className="mx-auto object-cover rounded-full h-16 w-16  border-2 border-white dark:border-gray-800"
-            />
-          </a>
+          <img
+            alt="perfil"
+            src={
+              session.user.image ||
+              "https://static.vecteezy.com/system/resources/previews/009/292/244/non_2x/default-avatar-icon-of-social-media-user-vector.jpg"
+            }
+            referrerPolicy="no-referrer" // Evita enviar información del origen
+            className="mx-auto object-cover rounded-full h-16 w-16 border-2 border-white dark:border-gray-800"
+          />
+
           <p className="mt-2 text-xl font-medium text-gray-800 dark:text-white">
-            {user.username}
+            {session.user.name}
           </p>
-          <p className="mb-4 text-xs text-gray-400">{Zona}</p>
+          <p className="mb-4 text-xs text-gray-400 text-center">
+            {Zona} <br /> {session.user.email}
+          </p>
           <Button className="p-2 px-4 text-xs text-white bg-pink-500 rounded-full">
             Editar Perfil
           </Button>
@@ -76,6 +65,8 @@ export default function Dashboard() {
       </div>
     </div>
   ) : (
-    <p>Cargando...</p>
+    <div>
+      <h1>Cargando....</h1>
+    </div>
   );
 }

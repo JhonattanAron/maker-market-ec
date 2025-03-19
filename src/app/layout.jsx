@@ -1,17 +1,15 @@
-"use client";
-
 import { NavBarHome } from "@/components/navigation/NavBarHome";
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
+import ProviderSession from "@/provider/Providers";
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <AuthProvider>
+        <ProviderSession>
           <NavBarHome />
           {children}
-        </AuthProvider>
+        </ProviderSession>
       </body>
     </html>
   );
