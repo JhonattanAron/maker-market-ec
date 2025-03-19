@@ -37,6 +37,7 @@ import { useRouter } from "next/navigation";
 import ROUTES from "@/constants/routes";
 import LogoutButton from "../auth/LogoutButton";
 import { useSession } from "next-auth/react";
+import { MenuNav } from "./MenuNav";
 
 const navListMenuItems = [
   {
@@ -260,13 +261,7 @@ export function NavBarHome() {
         <div className="hidden gap-2 lg:flex">
           {session?.user ? (
             <>
-              <a href="#" className="relative block">
-                <img
-                  alt="profil"
-                  src={userImage}
-                  className="mx-auto object-cover rounded-full h-12 w-12 "
-                />
-              </a>
+              <MenuNav userImage={userImage} />
             </>
           ) : (
             <>

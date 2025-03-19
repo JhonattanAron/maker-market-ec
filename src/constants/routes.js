@@ -3,6 +3,7 @@ const ROUTES = {
     LOGIN: "/auth/login",
     REGISTER: "/auth/register",
     HOME: "/",
+    HELP: "/help",
   },
   PROTECTED: {
     DASHBOARD: "/dashboard", //dashboard y perfil

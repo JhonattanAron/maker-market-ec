@@ -2,6 +2,7 @@ import ROUTES from "@/constants/routes";
 import NextAuth, { Session, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import jwt from "jsonwebtoken";
 
 declare module "next-auth" {
   interface Session {
@@ -21,6 +22,7 @@ const handler = NextAuth({
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
+
       async authorize(credentials) {
         try {
           const res = await fetch(`http://localhost:8080/auth/login`, {
@@ -37,6 +39,8 @@ const handler = NextAuth({
           if (!res.ok) {
             const errorData = await res.json();
             console.error("Error del backend:", errorData);
+
+            // Propaga el mensaje de error específico del backend
             throw new Error(errorData.message || "Credenciales inválidas");
           }
 
@@ -55,14 +59,20 @@ const handler = NextAuth({
           const token = tokenMatch[1];
           console.log("Token extraído:", token);
 
+          // Decodificar el token JWT para extraer los datos del usuario
+          const decodedToken = jwt.decode(token) as jwt.JwtPayload;
+          console.log("Datos decodificados del token:", decodedToken);
+
           return {
-            id: "unique-id", // Provide a unique identifier for the user
-            token, // Token JWT extraído de la cookie
-            email: credentials?.email,
+            id: String(decodedToken.sub), // ID único del usuario convertido a string
+            token, // Token JWT
+            name: decodedToken.name as string,
+            email: decodedToken.email,
+            image: decodedToken.image,
           };
         } catch (error) {
           console.error("Error en authorize:", error);
-          throw new Error("Error al conectar con el servidor");
+          throw new Error(error.message || "Error al conectar con el servidor");
         }
       },
     }),
@@ -81,6 +91,34 @@ const handler = NextAuth({
       return session;
     },
   },
+  events: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/auth/google-login`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: user.email,
+                name: user.name,
+                image: user.image,
+                googleId: user.id,
+              }),
+            }
+          );
+
+          const data = await response.json();
+          if (!response.ok)
+            throw new Error(data.message || "Error en el login");
+        } catch (error) {
+          console.error("Error en Google SignIn:", error);
+        }
+      }
+    },
+  },
+
   secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: ROUTES.PUBLIC.LOGIN, // Página personalizada de inicio de sesión
